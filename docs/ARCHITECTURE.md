@@ -1,22 +1,29 @@
-# Architecture (Phase 1)
+# Architecture (Phase 4)
 
-## Backend (Express + TypeScript)
-- `src/server.ts`: app bootstrap, security middleware, route wiring, role seeding.
-- `src/routes`: API routes (`/api/health`, `/api/auth/*`).
-- `src/services`: auth logic, role seeding, audit logging.
-- `src/middleware`: auth guard, validation, centralized error handler.
-- `prisma/`: schema and SQL migration.
+## Backend Modules
+- Auth module (OTP + mobile/password login).
+- Member Profile module (owner-only).
+- Company Profile module (owner-only).
+- Factory module (owner-only CRUD).
+- Machinery module (owner-only CRUD, factory-scoped list/create).
 
-## Frontend (React + Vite)
-- Persian RTL pages for landing, OTP request/verify, register, login, dashboard.
-- Route guard for protected dashboard.
-- Shared API client and auth context.
+## Data Model Evolution
+- `User` -> one `CompanyProfile`
+- `CompanyProfile` -> many `Factory`
+- `Factory` -> many `Machinery`
+- `Factory` and `Machinery` both store `ownerUserId` for strict anti-IDOR filtering.
 
-## Database
-Prisma models implemented:
-- `User`, `Role`, `UserRole`
-- `OtpRequest`, `MobileVerification`
-- `RefreshToken`, `AuditLog`
+## API Shape
+- Factory-scoped machinery:
+  - `GET/POST /api/factories/:factoryId/machinery`
+- Machinery item endpoints:
+  - `GET/PUT/DELETE /api/machinery/:id`
 
-## Expansion Path
-Phase 2 will add Member/Company profile modules on top of current user + role + auth baseline.
+## Frontend
+- Added routes:
+  - `/factories/:factoryId/machinery`
+  - `/factories/:factoryId/machinery/new`
+  - `/machinery/:id/edit`
+
+## Future Path
+- Phase 5: Materials & Mix Design Foundation, then cost/pricing layers.

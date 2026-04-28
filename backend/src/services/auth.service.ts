@@ -88,7 +88,7 @@ export async function register(data: { mobileNumber: string; fullName: string; p
   if (!isValidMobile(mobile)) throw new Error('شماره موبایل معتبر نیست.');
 
   const verification = await prisma.mobileVerification.findUnique({ where: { mobileNumber: mobile } });
-  if (!verification || Date.now() - verification.verifiedAt.getTime() > 15 * 60 * 1000) {
+  if (env.authRequireOtpForRegistration && (!verification || Date.now() - verification.verifiedAt.getTime() > 15 * 60 * 1000)) {
     throw new Error('ابتدا شماره موبایل را تأیید کنید.');
   }
 
@@ -102,10 +102,10 @@ export async function register(data: { mobileNumber: string; fullName: string; p
   const user = await prisma.user.create({
     data: {
       username,
-      fullName: data.fullName,
+      fullName: data.fullName.trim(),
       mobileNumber: mobile,
       passwordHash,
-      isMobileVerified: true,
+      isMobileVerified: Boolean(verification),
       userRoles: { create: [{ roleId: memberRole.id }] },
     },
     include: { userRoles: { include: { role: true } } },

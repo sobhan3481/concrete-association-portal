@@ -1,20 +1,23 @@
-# Security Baseline (Phase 1)
+# Security Baseline (Phase 4)
 
-- **Password Hashing**: `bcryptjs` with cost factor 12.
-- **JWT**: signed access token with configurable expiry.
-- **OTP Security**:
-  - OTP generated server-side.
-  - OTP stored as SHA-256 hash (not plaintext).
-  - Expiration, attempt cap, and resend cooldown enforced.
-- **Rate Limiting**:
-  - `/api/auth/request-otp`: 3 requests/min/IP
-  - `/api/auth/login`: 5 requests/min/IP
-- **Validation**: request body schema validation via `zod`.
-- **Audit Logging**: `OTP_REQUESTED`, `OTP_VERIFIED`, `USER_REGISTERED`, `LOGIN_SUCCESS`, `LOGIN_FAILURE`.
-- **CORS**: configurable allowed origin for localhost frontend.
-- **Role Seed**: `MEMBER`, `ASSOCIATION_ADMIN`, `SYSTEM_ADMIN` (idempotent upsert).
+## Auth & Ownership
+- All machinery endpoints require JWT.
+- Machinery is owner-scoped by `ownerUserId`.
+- Factory ownership is verified before machinery list/create operations.
 
-## Future Hardening
-- Per-tenant authorization policies to prevent cross-company access.
-- Anti-IDOR checks on all future member/company/factory resources.
-- Optional refresh-token rotation and revocation endpoints.
+## Machinery Anti-IDOR Rules
+- `GET /api/factories/:factoryId/machinery` and `POST /api/factories/:factoryId/machinery` first verify owned factory.
+- `GET/PUT/DELETE /api/machinery/:id` filter by `ownerUserId` and return safe not-found when not owned.
+- No public machinery listing across users.
+
+## Data Isolation
+- No competitor factory or machinery data leakage.
+- Backend enforces ownership checks; frontend filtering is not trusted.
+
+## Validation & Auditing
+- Server-side Zod validation for machinery payload.
+- Audit logs for `MACHINERY_CREATED`, `MACHINERY_UPDATED`, `MACHINERY_DELETED` include `machineryId`, `factoryId`, and `machineryType`.
+
+## Secrets
+- `.env` is not committed.
+- `.env.example` contains only local-safe placeholders.

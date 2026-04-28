@@ -1,33 +1,59 @@
 import { useEffect, useState } from 'react';
-import { apiRequest } from '../api/client';
+import { Link } from 'react-router-dom';
+import { apiRequest, listFactories, listMachinery } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { PREVIEW_MODE } from '../config';
 
 type Profile = {
   fullName: string;
-  username: string;
   mobileNumber: string;
-  roles: string[];
 };
 
-const statusCards = ['وضعیت عضویت', 'تکمیل پروفایل', 'کارخانه‌های ثبت‌شده', 'پیشنهاد قیمت'];
+type MemberProfile = {
+  profileStatus: 'INCOMPLETE' | 'COMPLETE';
+  approvalStatus: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
+};
+
+type CompanyProfile = {
+  companyName: string;
+  companyStatus: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+};
+
+type Factory = { id: string };
 
 function DashboardPage() {
   const { token } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [memberProfile, setMemberProfile] = useState<MemberProfile | null>(null);
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
+  const [factoryCount, setFactoryCount] = useState(0);
+  const [machineryCount, setMachineryCount] = useState(0);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    async function loadProfile() {
+    async function loadData() {
       try {
-        const result = await apiRequest<Profile>('/api/auth/me', {}, token ?? undefined);
-        setProfile(result);
+        const [me, member, company, factories] = await Promise.all([
+          apiRequest<Profile>('/api/auth/me', {}, token ?? undefined),
+          apiRequest<MemberProfile>('/api/member-profile/me', {}, token ?? undefined),
+          apiRequest<CompanyProfile>('/api/company-profile/me', {}, token ?? undefined),
+          listFactories(token ?? undefined),
+        ]);
+
+        const machineryLists = await Promise.all((factories as Factory[]).map((x) => listMachinery(x.id, token ?? undefined)));
+        const machineryTotal = machineryLists.reduce((sum: number, items: { length: number }) => sum + items.length, 0);
+
+        setProfile(me);
+        setMemberProfile(member);
+        setCompanyProfile(company);
+        setFactoryCount(factories.length);
+        setMachineryCount(machineryTotal);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'امکان دریافت اطلاعات کاربر وجود ندارد.');
       }
     }
 
-    void loadProfile();
+    void loadData();
   }, [token]);
 
   return (
@@ -39,16 +65,27 @@ function DashboardPage() {
         <>
           <ul className="profile-list">
             <li>نام کاربر: {profile.fullName}</li>
-            <li>نقش: {profile.roles.join('، ')}</li>
-            <li>موبایل: {profile.mobileNumber}</li>
+            <li>شماره موبایل: {profile.mobileNumber}</li>
+            <li>وضعیت تکمیل پروفایل: {memberProfile?.profileStatus === 'COMPLETE' ? 'تکمیل شده' : 'ناقص'}</li>
+            <li>وضعیت عضویت: {memberProfile?.approvalStatus === 'APPROVED' ? 'تأیید شده' : memberProfile?.approvalStatus === 'REJECTED' ? 'رد شده' : 'در انتظار بررسی'}</li>
+            <li>اطلاعات شرکت: {companyProfile?.companyName ? `${companyProfile.companyName} (${companyProfile.companyStatus})` : 'ثبت نشده'}</li>
+            <li>تعداد کارخانه‌ها: {factoryCount}</li>
+            <li>تعداد ماشین‌آلات: {machineryCount}</li>
           </ul>
+
+          <div className="cta-row">
+            <Link className="cta-primary" to="/profile">تکمیل/ویرایش پروفایل</Link>
+            <Link className="cta-secondary" to="/company">ثبت/ویرایش شرکت</Link>
+            <Link className="cta-secondary" to="/factories">مدیریت کارخانه‌ها</Link>
+            <Link className="cta-secondary" to="/factories">مدیریت ماشین‌آلات</Link>
+          </div>
+
+          {factoryCount === 0 && <p className="hint">برای مدیریت ماشین‌آلات ابتدا کارخانه خود را ثبت کنید.</p>}
+
           <div className="status-grid">
-            {statusCards.map((card) => (
-              <article className="status-card" key={card}>
-                <h3>{card}</h3>
-                <p>آماده برای تکمیل در فاز بعدی</p>
-              </article>
-            ))}
+            <article className="status-card"><h3>کارخانه‌ها</h3><p>{factoryCount} واحد ثبت شده</p></article>
+            <article className="status-card"><h3>ماشین‌آلات</h3><p>{machineryCount} مورد ثبت شده</p></article>
+            <article className="status-card disabled"><h3>پیشنهاد قیمت</h3><p>به‌زودی</p></article>
           </div>
         </>
       )}

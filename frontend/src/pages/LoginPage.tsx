@@ -35,9 +35,9 @@ function LoginPage() {
   return (
     <section className="card auth-card">
       <h2>ورود اعضا</h2>
-      <p>با شماره موبایل یا نام کاربری وارد پرتال شوید.</p>
+      <p>با شماره موبایل (یا نام کاربری) وارد پرتال شوید.</p>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="login">شماره موبایل یا نام کاربری</label>
+        <label htmlFor="login">شماره موبایل (یا نام کاربری)</label>
         <input id="login" value={login} onChange={(event) => setLogin(event.target.value)} required />
         <label htmlFor="password">رمز عبور</label>
         <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
