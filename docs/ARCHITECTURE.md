@@ -1,22 +1,25 @@
-# Architecture (Phase 1)
+# Architecture (Phase 5)
 
-## Backend (Express + TypeScript)
-- `src/server.ts`: app bootstrap, security middleware, route wiring, role seeding.
-- `src/routes`: API routes (`/api/health`, `/api/auth/*`).
-- `src/services`: auth logic, role seeding, audit logging.
-- `src/middleware`: auth guard, validation, centralized error handler.
-- `prisma/`: schema and SQL migration.
+## Modules
+- Auth
+- Member Profile
+- Company Profile
+- Factory
+- Machinery
+- Materials
+- MixDesign
 
-## Frontend (React + Vite)
-- Persian RTL pages for landing, OTP request/verify, register, login, dashboard.
-- Route guard for protected dashboard.
-- Shared API client and auth context.
+## Data Relations
+- Factory -> many Material
+- Factory -> many MixDesign
+- MixDesign -> many MixDesignItem
+- Material -> many MixDesignItem
+- Material/MixDesign store ownerUserId for anti-IDOR
 
-## Database
-Prisma models implemented:
-- `User`, `Role`, `UserRole`
-- `OtpRequest`, `MobileVerification`
-- `RefreshToken`, `AuditLog`
+## Cost Baseline
+- `directMaterialCostPerM3`: sum of MixDesignItem costs
+- `calculatedCostPerM3`: direct + lab + waste
+- Final selling price is out of scope
 
-## Expansion Path
-Phase 2 will add Member/Company profile modules on top of current user + role + auth baseline.
+## Future Path
+- Phase 6: Production Costs & Overhead Foundation

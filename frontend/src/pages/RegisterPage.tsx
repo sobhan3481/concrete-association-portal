@@ -28,7 +28,7 @@ function RegisterPage() {
   return (
     <section className="card auth-card">
       <h2>ثبت‌نام عضو جدید</h2>
-      <p>اطلاعات اولیه را وارد کنید تا حساب کاربری شما ایجاد شود.</p>
+      <p>ثبت‌نام در این فاز با موبایل و رمز عبور انجام می‌شود و OTP اجباری نیست.</p>
       <form onSubmit={handleSubmit}>
         <label htmlFor="fullName">نام و نام خانوادگی</label>
         <input id="fullName" value={fullName} onChange={(event) => setFullName(event.target.value)} required />
