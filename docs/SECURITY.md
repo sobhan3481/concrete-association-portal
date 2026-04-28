@@ -1,30 +1,20 @@
-# امنیت فاز ۱
+# Security Baseline (Phase 1)
 
-## طراحی احراز هویت
-- ورود با `mobile یا username + password`.
-- رمز عبور با `PasswordHasher` هش می‌شود و plaintext ذخیره نمی‌شود.
-- JWT برای دسترسی کوتاه‌مدت و Refresh Token هش‌شده در دیتابیس.
+- **Password Hashing**: `bcryptjs` with cost factor 12.
+- **JWT**: signed access token with configurable expiry.
+- **OTP Security**:
+  - OTP generated server-side.
+  - OTP stored as SHA-256 hash (not plaintext).
+  - Expiration, attempt cap, and resend cooldown enforced.
+- **Rate Limiting**:
+  - `/api/auth/request-otp`: 3 requests/min/IP
+  - `/api/auth/login`: 5 requests/min/IP
+- **Validation**: request body schema validation via `zod`.
+- **Audit Logging**: `OTP_REQUESTED`, `OTP_VERIFIED`, `USER_REGISTERED`, `LOGIN_SUCCESS`, `LOGIN_FAILURE`.
+- **CORS**: configurable allowed origin for localhost frontend.
+- **Role Seed**: `MEMBER`, `ASSOCIATION_ADMIN`, `SYSTEM_ADMIN` (idempotent upsert).
 
-## طراحی OTP
-- OTP شش رقمی با انقضا (۲ دقیقه) و سقف تلاش (۵ بار).
-- OTP به‌صورت هش (SHA-256) در دیتابیس ذخیره می‌شود.
-- ارسال OTP فقط با `IOtpSender` abstraction؛ در Development فقط log می‌شود.
-- Rate limit برای endpoint درخواست OTP اعمال شده است.
-
-## Rate Limiting
-- `/api/auth/request-otp`: حداکثر ۳ درخواست در هر ۱ دقیقه برای هر IP.
-- `/api/auth/login`: حداکثر ۵ درخواست در هر ۱ دقیقه برای هر IP.
-
-## Audit Logging
-- رویدادهای `OTP_REQUESTED`, `OTP_VERIFIED`, `USER_REGISTERED`, `LOGIN_SUCCESS`, `LOGIN_FAILURE` در `AuditLogs` ثبت می‌شوند.
-
-## CORS و Secret Management
-- CORS فقط برای originهای تعریف‌شده در config.
-- مقادیر secrets باید از env vars یا secret manager تزریق شوند.
-- فایل `.env.example` فقط template است و secret واقعی ندارد.
-
-## برنامه Tenant Isolation و Anti-IDOR (فازهای بعد)
-- تمام رکوردهای domain باید `OwnerMemberId/CompanyId` داشته باشند.
-- همه queryها باید scope-based filtering داشته باشند (tenant-bound).
-- APIها نباید ID خام متعلق به tenant دیگر را برگردانند یا بپذیرند بدون policy.
-- policy-based authorization برای owner/admin از فاز ۲ اضافه می‌شود.
+## Future Hardening
+- Per-tenant authorization policies to prevent cross-company access.
+- Anti-IDOR checks on all future member/company/factory resources.
+- Optional refresh-token rotation and revocation endpoints.

@@ -1,71 +1,65 @@
-# Concrete Association Portal
+# Concrete Association Portal (Phase 1 - Node.js Fullstack Foundation)
 
-فاز ۱ این مخزن، یک زیرساخت اجرایی برای پرتال امن انجمن بتن را فراهم می‌کند.
+این مخزن اکنون با **Node.js + TypeScript** برای backend و **React + Vite** برای frontend بوت‌استرپ شده است.
 
-## ساختار پروژه
+## Stack
+- Backend: Node.js + Express + TypeScript + Prisma
+- Database: PostgreSQL
+- Frontend: React + TypeScript + Vite (RTL Persian UI)
 
+## Project Structure
 ```text
 /backend
+  /prisma
   /src
-    /ConcreteAssociation.Api
-    /ConcreteAssociation.Application
-    /ConcreteAssociation.Domain
-    /ConcreteAssociation.Infrastructure
-  /tests
-    /ConcreteAssociation.Tests
 /frontend
-/docs
-/docker
+/docker-compose.yml
 ```
 
-## پیش‌نیازها
-- .NET SDK 8.0+
-- Node.js 20+
-- Docker (اختیاری برای PostgreSQL محلی)
-- PostgreSQL 16+
+## Local URLs
+- Backend: `http://localhost:4000`
+- Frontend: `http://localhost:5173`
+- Health Check: `http://localhost:4000/api/health`
 
-## اجرای دیتابیس محلی
+## 1) Run Database
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+docker compose up -d
 ```
 
-## تنظیم متغیرهای محیطی
-- backend: کپی از `backend/.env.example`
-- frontend: کپی از `frontend/.env.example`
-
-## اجرای Backend
+## 2) Run Backend
 ```bash
 cd backend
-dotnet restore ConcreteAssociation.sln
-dotnet ef database update --project src/ConcreteAssociation.Infrastructure --startup-project src/ConcreteAssociation.Api
-dotnet run --project src/ConcreteAssociation.Api
+cp .env.example .env
+npm install
+npx prisma generate
+npx prisma migrate deploy
+npm run dev
 ```
 
-Health endpoint:
-- `GET http://localhost:5080/api/health`
+## 3) Run Frontend
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
 
-Auth endpoints:
+## Implemented Phase 1 Endpoints
 - `POST /api/auth/request-otp`
 - `POST /api/auth/verify-otp`
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/me`
+- `GET /api/health`
 
-## اجرای Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+## Security Baseline
+- Password hashing (`bcryptjs`)
+- JWT access token auth
+- Hashed OTP storage (`SHA-256`)
+- Rate limiting for OTP request and login
+- Request validation (`zod`)
+- Audit logging for OTP/login/register
+- Role model seed: `MEMBER`, `ASSOCIATION_ADMIN`, `SYSTEM_ADMIN`
 
-## یادداشت‌های امنیتی فاز ۱
-- OTP hash شده ذخیره می‌شود.
-- Password hash با الگوریتم امن ASP.NET Identity.
-- Rate limiting روی درخواست OTP و Login فعال است.
-- Audit log برای رویدادهای اصلی احراز هویت فعال است.
-- CORS برای frontend محلی محدود شده است.
-
-## فاز بعدی (Phase 2)
-- پیاده‌سازی Member/Company Profile
-- تایید عضویت انجمن
-- طراحی policyهای tenant isolation در لایه application
+## Out of Scope in this Phase
+Company profile, factories, machinery, materials, mix design, costing, pricing proposals, and admin reporting are intentionally not implemented yet.

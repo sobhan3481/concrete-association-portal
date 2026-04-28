@@ -1,33 +1,20 @@
-# گزارش پیاده‌سازی فاز ۱
+# Phase 1 Implementation Report (Node Stack)
 
-## تغییرات انجام‌شده
-- ایجاد monorepo ساختاریافته backend/frontend/docs/docker.
-- پیاده‌سازی API احراز هویت، OTP، JWT، نقش‌های پایه، و لاگ حسابرسی.
-- پیاده‌سازی migration اولیه جداول احراز هویت.
-- پیاده‌سازی frontend React + TypeScript با UI فارسی RTL برای جریان ثبت‌نام/ورود.
+## What Changed
+- Replaced previous backend implementation with Node.js + Express + TypeScript + Prisma.
+- Added PostgreSQL Prisma schema and migration.
+- Added auth flow endpoints (OTP, verify, register, login, me).
+- Kept React + TypeScript frontend with Persian RTL auth flow pages.
+- Added root docker-compose for PostgreSQL.
 
-## فایل‌های کلیدی ایجاد شده
-- backend solution + projects + domain/application/infrastructure/api code
-- frontend app with routing/auth pages
-- docs/ARCHITECTURE.md و docs/SECURITY.md
-- docker/docker-compose.yml برای PostgreSQL محلی
+## Commands Run
+- backend: npm install, prisma generate, npm run build
+- frontend: npm install, npm run build
 
-## Commands run
-- `node --version && npm --version` -> موفق
-- `npm install` در frontend -> موفق
-- `npm run build` در frontend -> موفق
-- `dotnet --version` -> ناموفق (SDK موجود نیست)
+## Known Limitations
+- OTP sender is development-only and logs OTP to console.
+- No real SMS provider integration in this phase.
+- No refresh-token rotation endpoint yet.
 
-## وضعیت Build/Test
-- Frontend build: موفق
-- Backend build/test: قابل اجرا نبود به‌دلیل نبود .NET SDK در محیط
-- تست‌های backend نوشته شد اما اجرا نشد
-
-## محدودیت‌های شناخته‌شده
-- در محیط فعلی امکان اجرای `dotnet restore/build/test` وجود نداشت.
-- migration فایل به‌صورت کدی اضافه شده و اجرای واقعی آن به SDK نیاز دارد.
-
-## پیشنهاد دقیق فاز ۲
-- ایجاد موجودیت‌ها و APIهای Member/Company Profile
-- اتصال profile به user فعلی و enforce کردن policyهای tenant-aware
-- افزودن workflow تایید عضویت توسط AssociationAdmin
+## Next Phase Recommendation
+Implement Member/Company profile with tenant-aware authorization and approval workflow.

@@ -431,3 +431,4 @@ FodyWeavers.xsd
 # Frontend build artifacts
 frontend/dist/
 frontend/*.tsbuildinfo
+backend/dist/
