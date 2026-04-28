@@ -1,20 +1,26 @@
-# Security Baseline (Phase 1)
+# Security Baseline (Phase 2)
 
-- **Password Hashing**: `bcryptjs` with cost factor 12.
-- **JWT**: signed access token with configurable expiry.
-- **OTP Security**:
-  - OTP generated server-side.
-  - OTP stored as SHA-256 hash (not plaintext).
-  - Expiration, attempt cap, and resend cooldown enforced.
-- **Rate Limiting**:
-  - `/api/auth/request-otp`: 3 requests/min/IP
-  - `/api/auth/login`: 5 requests/min/IP
-- **Validation**: request body schema validation via `zod`.
-- **Audit Logging**: `OTP_REQUESTED`, `OTP_VERIFIED`, `USER_REGISTERED`, `LOGIN_SUCCESS`, `LOGIN_FAILURE`.
-- **CORS**: configurable allowed origin for localhost frontend.
-- **Role Seed**: `MEMBER`, `ASSOCIATION_ADMIN`, `SYSTEM_ADMIN` (idempotent upsert).
+## Authentication
+- ورود اصلی فعلی: **شماره موبایل + رمز عبور**.
+- ورود با username نیز برای سازگاری عقب‌رو فعال مانده است.
+- OTP endpointها حفظ شده‌اند تا در آینده با پنل SMS واقعی متصل شوند.
+- `AUTH_REQUIRE_OTP_FOR_REGISTRATION=false` در فاز ۲ باعث می‌شود ثبت‌نام بدون OTP اجباری انجام شود.
 
-## Future Hardening
-- Per-tenant authorization policies to prevent cross-company access.
-- Anti-IDOR checks on all future member/company/factory resources.
-- Optional refresh-token rotation and revocation endpoints.
+## Authorization & Data Isolation
+- مسیرهای `/api/member-profile/me` و `/api/company-profile/me` همگی با JWT محافظت می‌شوند.
+- کاربر فقط روی داده متعلق به `userId` خودش عملیات انجام می‌دهد.
+- endpoint عمومی برای خواندن پروفایل کاربران دیگر وجود ندارد (Anti-IDOR).
+
+## Validation & Input Safety
+- تمام ورودی‌ها با `zod` در backend اعتبارسنجی می‌شوند.
+- طول رشته‌ها و فرمت فیلدهای حساس مانند کد ملی/کد پستی/URL لوگو بررسی می‌شود.
+
+## Audit Logging
+رخدادهای ثبت‌شده:
+- `USER_REGISTERED`, `LOGIN_SUCCESS`, `LOGIN_FAILURE`
+- `MEMBER_PROFILE_CREATED`, `MEMBER_PROFILE_UPDATED`
+- `COMPANY_PROFILE_CREATED`, `COMPANY_PROFILE_UPDATED`
+
+## Secrets & Sensitive Data
+- hash رمز عبور/refresh token/OTP ذخیره می‌شود و در API خروجی داده نمی‌شود.
+- secretها در `.env` مدیریت می‌شوند و نباید commit شوند.
