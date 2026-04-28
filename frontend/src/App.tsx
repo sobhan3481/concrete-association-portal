@@ -12,6 +12,8 @@ import ProfilePage from './pages/ProfilePage';
 import CompanyPage from './pages/CompanyPage';
 import FactoriesPage from './pages/FactoriesPage';
 import FactoryFormPage from './pages/FactoryFormPage';
+import MachineryPage from './pages/MachineryPage';
+import MachineryFormPage from './pages/MachineryFormPage';
 
 function App() {
   const { token, logout } = useAuth();
@@ -29,6 +31,7 @@ function App() {
           {token && <Link to="/profile">پروفایل</Link>}
           {token && <Link to="/company">شرکت</Link>}
           {token && <Link to="/factories">کارخانه‌ها</Link>}
+          {token && <Link to="/factories">ماشین‌آلات</Link>}
           {!token && <Link to="/login">ورود</Link>}
           {!token && <Link to="/register">ثبت‌نام</Link>}
           {!token && <Link to="/request-otp">دریافت کد تأیید</Link>}
@@ -94,6 +97,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <FactoryFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/:factoryId/machinery"
+            element={
+              <ProtectedRoute>
+                <MachineryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/:factoryId/machinery/new"
+            element={
+              <ProtectedRoute>
+                <MachineryFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/machinery/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MachineryFormPage />
               </ProtectedRoute>
             }
           />

@@ -61,6 +61,21 @@ enum OperationalStatus {
   INACTIVE
 }
 
+enum MachineryType {
+  LOADER
+  MIXER
+  DUMP_TRUCK
+  STATIONARY_PUMP
+  BOOM_PUMP
+}
+
+enum MachineryOwnershipType {
+  OWNED
+  RENTED
+  LEASED
+  OTHER
+}
+
 model User {
   id               String          @id @default(cuid())
   username         String          @unique
@@ -75,6 +90,7 @@ model User {
   memberProfile    MemberProfile?
   companyProfile   CompanyProfile?
   ownedFactories   Factory[]
+  ownedMachinery   Machinery[]
 }
 
 model Role {
@@ -211,7 +227,39 @@ model Factory {
   updatedAt                 DateTime             @updatedAt
   companyProfile            CompanyProfile       @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
   ownerUser                 User                 @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  machinery                 Machinery[]
 
   @@index([companyProfileId])
   @@index([ownerUserId])
+}
+
+model Machinery {
+  id                          String                 @id @default(cuid())
+  factoryId                   String
+  ownerUserId                 String
+  machineryType               MachineryType
+  ownershipType               MachineryOwnershipType
+  title                       String
+  quantity                    Int
+  brand                       String?
+  model                       String?
+  manufactureYear             Int?
+  capacityValue               Decimal?               @db.Decimal(12, 2)
+  capacityUnit                String?
+  boomLengthMeters            Decimal?               @db.Decimal(12, 2)
+  monthlyRentAmount           Decimal?               @db.Decimal(12, 2)
+  depreciationMonthlyAmount   Decimal?               @db.Decimal(12, 2)
+  fuelCostMonthly             Decimal?               @db.Decimal(12, 2)
+  maintenanceCostMonthly      Decimal?               @db.Decimal(12, 2)
+  driverOrOperatorCostMonthly Decimal?               @db.Decimal(12, 2)
+  isActive                    Boolean                @default(true)
+  notes                       String?
+  createdAt                   DateTime               @default(now())
+  updatedAt                   DateTime               @updatedAt
+  factory                     Factory                @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  ownerUser                   User                   @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@index([factoryId])
+  @@index([ownerUserId])
+  @@index([machineryType])
 }

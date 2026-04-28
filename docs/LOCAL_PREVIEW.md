@@ -1,4 +1,4 @@
-# Local Run Modes (Phase 3)
+# Local Run Modes (Phase 4)
 
 ## A) Frontend-only Preview (Windows CMD)
 ```cmd
@@ -13,6 +13,7 @@ npm run dev
 Open:
 - http://localhost:5173
 - http://localhost:5173/factories
+- http://localhost:5173/factories/mock-factory-1/machinery
 
 ## B) Full backend + DB mode (Windows CMD)
 ```cmd

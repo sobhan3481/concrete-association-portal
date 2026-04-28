@@ -71,3 +71,27 @@ export const factorySchema = z.object({
   operationalStatus: z.enum(['ACTIVE', 'SEMI_ACTIVE', 'INACTIVE']).default('ACTIVE'),
   notes: z.string().trim().max(1000).optional().or(z.literal('').transform(() => undefined)),
 });
+
+
+const currentYear = new Date().getFullYear();
+const optionalMoney = z.coerce.number().positive().optional();
+
+export const machinerySchema = z.object({
+  machineryType: z.enum(['LOADER', 'MIXER', 'DUMP_TRUCK', 'STATIONARY_PUMP', 'BOOM_PUMP']),
+  ownershipType: z.enum(['OWNED', 'RENTED', 'LEASED', 'OTHER']),
+  title: z.string().trim().min(2).max(160),
+  quantity: z.coerce.number().int().min(1),
+  brand: z.string().trim().max(100).optional().or(z.literal('').transform(() => undefined)),
+  model: z.string().trim().max(100).optional().or(z.literal('').transform(() => undefined)),
+  manufactureYear: z.coerce.number().int().min(1970).max(currentYear + 1).optional(),
+  capacityValue: z.coerce.number().positive().optional(),
+  capacityUnit: z.string().trim().max(30).optional().or(z.literal('').transform(() => undefined)),
+  boomLengthMeters: z.coerce.number().positive().optional(),
+  monthlyRentAmount: optionalMoney,
+  depreciationMonthlyAmount: optionalMoney,
+  fuelCostMonthly: optionalMoney,
+  maintenanceCostMonthly: optionalMoney,
+  driverOrOperatorCostMonthly: optionalMoney,
+  isActive: z.boolean().default(true),
+  notes: z.string().trim().max(1000).optional().or(z.literal('').transform(() => undefined)),
+});

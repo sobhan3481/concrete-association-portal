@@ -50,6 +50,7 @@ function FactoriesPage() {
               <p>ظرفیت تولید: {item.dailyProductionCapacityM3 ?? '-'} مترمکعب</p>
               <p>وضعیت فعالیت: {item.operationalStatus}</p>
               <div className="cta-row">
+                <Link className="cta-secondary" to={`/factories/${item.id}/machinery`}>ماشین‌آلات</Link>
                 <Link className="cta-secondary" to={`/factories/${item.id}/edit`}>ویرایش</Link>
                 <button type="button" onClick={() => onDelete(item.id)}>حذف</button>
               </div>

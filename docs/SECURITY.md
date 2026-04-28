@@ -1,22 +1,23 @@
-# Security Baseline (Phase 3)
+# Security Baseline (Phase 4)
 
-## Auth & Access
-- Factory endpoints all require JWT.
-- Member/company/factory resources are owner-scoped.
+## Auth & Ownership
+- All machinery endpoints require JWT.
+- Machinery is owner-scoped by `ownerUserId`.
+- Factory ownership is verified before machinery list/create operations.
 
-## Factory Anti-IDOR Rules
-- Every factory query filters by `ownerUserId = currentUserId`.
-- `GET /api/factories/:id`, `PUT /api/factories/:id`, `DELETE /api/factories/:id` return safe not-found when ownership does not match.
-- No public factory listing across users.
+## Machinery Anti-IDOR Rules
+- `GET /api/factories/:factoryId/machinery` and `POST /api/factories/:factoryId/machinery` first verify owned factory.
+- `GET/PUT/DELETE /api/machinery/:id` filter by `ownerUserId` and return safe not-found when not owned.
+- No public machinery listing across users.
 
 ## Data Isolation
-- No competitor factory data is exposed.
-- Backend never relies on frontend-only filtering.
+- No competitor factory or machinery data leakage.
+- Backend enforces ownership checks; frontend filtering is not trusted.
 
 ## Validation & Auditing
-- Factory input validation is server-side via Zod.
-- Audit logs for `FACTORY_CREATED`, `FACTORY_UPDATED`, `FACTORY_DELETED` include `factoryId` and `companyProfileId`.
+- Server-side Zod validation for machinery payload.
+- Audit logs for `MACHINERY_CREATED`, `MACHINERY_UPDATED`, `MACHINERY_DELETED` include `machineryId`, `factoryId`, and `machineryType`.
 
 ## Secrets
 - `.env` is not committed.
-- `.env.example` only includes local-safe placeholders.
+- `.env.example` contains only local-safe placeholders.
