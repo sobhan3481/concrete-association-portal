@@ -1,26 +1,23 @@
-# Security Baseline (Phase 2)
+# Security Baseline (Phase 2.5)
 
-## Authentication
-- ورود اصلی فعلی: **شماره موبایل + رمز عبور**.
-- ورود با username نیز برای سازگاری عقب‌رو فعال مانده است.
-- OTP endpointها حفظ شده‌اند تا در آینده با پنل SMS واقعی متصل شوند.
-- `AUTH_REQUIRE_OTP_FOR_REGISTRATION=false` در فاز ۲ باعث می‌شود ثبت‌نام بدون OTP اجباری انجام شود.
+## Auth
+- Primary login: mobile + password.
+- OTP endpoints remain available for future SMS integration.
+- Registration OTP requirement controlled by `AUTH_REQUIRE_OTP_FOR_REGISTRATION`.
 
-## Authorization & Data Isolation
-- مسیرهای `/api/member-profile/me` و `/api/company-profile/me` همگی با JWT محافظت می‌شوند.
-- کاربر فقط روی داده متعلق به `userId` خودش عملیات انجام می‌دهد.
-- endpoint عمومی برای خواندن پروفایل کاربران دیگر وجود ندارد (Anti-IDOR).
+## Authorization & Isolation
+- `/api/member-profile/me` and `/api/company-profile/me` require JWT.
+- Access is restricted to current user ownership (`userId`).
+- No public endpoints expose other members' profile/company data.
 
-## Validation & Input Safety
-- تمام ورودی‌ها با `zod` در backend اعتبارسنجی می‌شوند.
-- طول رشته‌ها و فرمت فیلدهای حساس مانند کد ملی/کد پستی/URL لوگو بررسی می‌شود.
+## Validation
+- Server-side Zod validation for auth/member/company inputs.
 
-## Audit Logging
-رخدادهای ثبت‌شده:
-- `USER_REGISTERED`, `LOGIN_SUCCESS`, `LOGIN_FAILURE`
-- `MEMBER_PROFILE_CREATED`, `MEMBER_PROFILE_UPDATED`
-- `COMPANY_PROFILE_CREATED`, `COMPANY_PROFILE_UPDATED`
+## Runtime Safety
+- Startup logs explicitly show DB init errors and next-step commands.
+- Health endpoint can still be checked even if DB init fails.
+- This does not reduce authorization checks; DB-backed APIs will still fail safely if DB is unavailable.
 
-## Secrets & Sensitive Data
-- hash رمز عبور/refresh token/OTP ذخیره می‌شود و در API خروجی داده نمی‌شود.
-- secretها در `.env` مدیریت می‌شوند و نباید commit شوند.
+## Secrets
+- `.env.example` only contains non-secret placeholders.
+- Never commit real `.env` values.

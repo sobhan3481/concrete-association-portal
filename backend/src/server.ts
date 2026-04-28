@@ -22,15 +22,28 @@ app.use('/api/member-profile', memberProfileRouter);
 app.use('/api/company-profile', companyProfileRouter);
 app.use(errorHandler);
 
+async function initializeDatabase() {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    await ensureRolesSeeded();
+    console.log('Database connection and role seeding completed.');
+  } catch (error) {
+    console.error('Database initialization failed. Backend is running but DB-dependent APIs may fail.');
+    console.error('Run: npm run prisma:generate (or prisma:generate:checksum-bypass), then check DATABASE_URL and PostgreSQL.');
+    console.error(error);
+  }
+}
+
 async function bootstrap() {
-  await ensureRolesSeeded();
   app.listen(env.port, () => {
     console.log(`Backend running on http://localhost:${env.port}`);
   });
+
+  await initializeDatabase();
 }
 
 bootstrap().catch(async (error) => {
-  console.error(error);
+  console.error('Fatal startup error:', error);
   await prisma.$disconnect();
   process.exit(1);
 });

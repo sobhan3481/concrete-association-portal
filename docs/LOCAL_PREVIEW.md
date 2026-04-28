@@ -1,34 +1,99 @@
-# اجرای پیش‌نمایش محلی (فقط Frontend)
+# Local Run Modes (Phase 2.5)
 
-در این حالت نیازی به Docker، PostgreSQL یا Backend ندارید.
+این پروژه دو حالت اصلی دارد:
 
-## Windows CMD
+1) Frontend-only preview (بدون backend)
+2) Full backend + database
+
+---
+
+## A) Frontend-only Preview (Windows CMD)
+
 ```cmd
+cd /d C:\Users\bavaf\concrete-association-portal
+git pull
+
 cd /d C:\Users\bavaf\concrete-association-portal\frontend
 copy /Y .env.example .env
 npm install
 npm run dev
 ```
 
-Preview URL:
+Open:
 - http://localhost:5173
 
-## Preview Mode
-در فایل `.env` مقدار زیر فعال باشد:
+این حالت به Docker/PostgreSQL/Prisma/backend نیاز ندارد.
 
-```env
-VITE_PREVIEW_MODE=true
+---
+
+## B) Full Backend Mode with Docker PostgreSQL (Windows CMD)
+
+```cmd
+cd /d C:\Users\bavaf\concrete-association-portal
+git pull
+docker compose up -d
+docker ps
+
+cd /d C:\Users\bavaf\concrete-association-portal\backend
+copy /Y .env.example .env
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run dev
 ```
 
-رفتار در این حالت:
-- ورود با موبایل + رمز عبور به‌صورت mock انجام می‌شود.
-- ثبت‌نام موفق شبیه‌سازی می‌شود.
-- داشبورد وضعیت پروفایل عضو/شرکت را نشان می‌دهد.
-- صفحه پروفایل عضو و صفحه شرکت امکان ذخیره mock دارند.
-- badge واضح «حالت پیش‌نمایش» نمایش داده می‌شود.
+Open:
+- http://localhost:4000/api/health
+
+If Prisma checksum error appears:
+```cmd
+npm run prisma:generate:checksum-bypass
+npm run prisma:migrate:checksum-bypass
+```
+
+---
+
+## C) Full Backend Mode without Docker (Local PostgreSQL on Windows)
+
+ابتدا PostgreSQL را نصب کنید.
+
+```cmd
+psql -U postgres
+CREATE DATABASE concrete_association_dev;
+\q
+```
+
+سپس:
+
+```cmd
+cd /d C:\Users\bavaf\concrete-association-portal\backend
+copy /Y .env.example .env
+```
+
+Ensure `backend\.env` contains:
 
 ## اتصال به backend واقعی
 ```env
-VITE_PREVIEW_MODE=false
-VITE_API_BASE_URL=http://localhost:4000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/concrete_association_dev?schema=public
+PORT=4000
+CORS_ORIGIN=http://localhost:5173
+AUTH_REQUIRE_OTP_FOR_REGISTRATION=false
+```
+
+Then:
+
+```cmd
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run dev
+```
+
+Open:
+- http://localhost:4000/api/health
+
+Fallback for checksum issue:
+```cmd
+npm run prisma:generate:checksum-bypass
+npm run prisma:migrate:checksum-bypass
 ```
