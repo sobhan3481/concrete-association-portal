@@ -11,6 +11,8 @@
 cd /d C:\Users\bavaf\concrete-association-portal\frontend
 copy /Y .env.example .env
 npm install
+npm run prisma:generate
+npm run prisma:migrate
 npm run dev
 ```
 Open:
