@@ -72,6 +72,7 @@ copy /Y .env.example .env
 
 Ensure `backend\.env` contains:
 
+## اتصال به backend واقعی
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/concrete_association_dev?schema=public
 PORT=4000
