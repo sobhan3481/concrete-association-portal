@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SystemRole {
+  MEMBER
+  ASSOCIATION_ADMIN
+  SYSTEM_ADMIN
+}
+
+model User {
+  id               String         @id @default(cuid())
+  username         String         @unique
+  fullName         String
+  mobileNumber     String         @unique
+  passwordHash     String
+  isMobileVerified Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  userRoles        UserRole[]
+  refreshTokens    RefreshToken[]
+}
+
+model Role {
+  id        String     @id @default(cuid())
+  name      SystemRole @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userRoles UserRole[]
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model OtpRequest {
+  id           String    @id @default(cuid())
+  mobileNumber String
+  otpHash      String
+  expiresAt    DateTime
+  attemptCount Int       @default(0)
+  maxAttempts  Int       @default(5)
+  isVerified   Boolean   @default(false)
+  verifiedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([mobileNumber])
+}
+
+model MobileVerification {
+  id           String   @id @default(cuid())
+  mobileNumber String   @unique
+  verifiedAt   DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  eventType   String
+  target      String
+  metadata    Json
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+}
