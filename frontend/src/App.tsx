@@ -10,6 +10,8 @@ import { useAuth } from './auth/AuthContext';
 import { PREVIEW_MODE } from './config';
 import ProfilePage from './pages/ProfilePage';
 import CompanyPage from './pages/CompanyPage';
+import FactoriesPage from './pages/FactoriesPage';
+import FactoryFormPage from './pages/FactoryFormPage';
 
 function App() {
   const { token, logout } = useAuth();
@@ -26,6 +28,7 @@ function App() {
           {token && <Link to="/dashboard">داشبورد</Link>}
           {token && <Link to="/profile">پروفایل</Link>}
           {token && <Link to="/company">شرکت</Link>}
+          {token && <Link to="/factories">کارخانه‌ها</Link>}
           {!token && <Link to="/login">ورود</Link>}
           {!token && <Link to="/register">ثبت‌نام</Link>}
           {!token && <Link to="/request-otp">دریافت کد تأیید</Link>}
@@ -67,6 +70,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <CompanyPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories"
+            element={
+              <ProtectedRoute>
+                <FactoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/new"
+            element={
+              <ProtectedRoute>
+                <FactoryFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/:id/edit"
+            element={
+              <ProtectedRoute>
+                <FactoryFormPage />
               </ProtectedRoute>
             }
           />

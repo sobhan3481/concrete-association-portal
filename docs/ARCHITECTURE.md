@@ -1,23 +1,27 @@
-# Architecture (Phase 2.5)
+# Architecture (Phase 3)
 
-## Backend (Express + TypeScript + Prisma)
-- `src/server.ts`: route wiring + startup lifecycle.
-  - HTTP server starts first.
-  - DB initialization/role seeding runs with clear logging.
-  - On DB failure, process keeps running for health checks but DB-dependent APIs may fail.
-- `src/routes/auth.route.ts`: OTP + register/login/me.
-- `src/routes/member-profile.route.ts`: owner-only `GET/PUT /me`.
-- `src/routes/company-profile.route.ts`: owner-only `GET/PUT /me`.
+## Backend Modules
+- Auth module (OTP + mobile/password login).
+- Member Profile module (owner-only).
+- Company Profile module (owner-only).
+- Factory module (owner-only CRUD): `GET/POST/PUT/DELETE /api/factories*`.
 
-## Prisma Layer
-- `prisma` and `@prisma/client` pinned to the same version (`5.22.0`) for stability.
-- SQL migrations live in `backend/prisma/migrations/*`.
-- Scripts provide normal and checksum-bypass Prisma flows.
+## Data Model Evolution
+- `User` -> one `CompanyProfile` (Phase 2 baseline)
+- `CompanyProfile` -> many `Factory` (Phase 3)
+- `Factory` stores both:
+  - `companyProfileId` for business relation
+  - `ownerUserId` for strict ownership filtering and anti-IDOR
 
 ## Frontend
-- Preview mode (`VITE_PREVIEW_MODE=true`) fully مستقل از backend.
-- Real mode calls backend APIs via `VITE_API_BASE_URL`.
+- Routes:
+  - `/dashboard`
+  - `/profile`
+  - `/company`
+  - `/factories`
+  - `/factories/new`
+  - `/factories/:id/edit`
+- Preview mode mocks all above without backend.
 
-## Data Ownership Rules
-- Member/company profiles are scoped to authenticated `userId`.
-- No public listing/id-based read endpoints for these profiles.
+## Future Path
+- Phase 4: Machinery management linked per factory.

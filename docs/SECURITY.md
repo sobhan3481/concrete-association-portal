@@ -1,23 +1,22 @@
-# Security Baseline (Phase 2.5)
+# Security Baseline (Phase 3)
 
-## Auth
-- Primary login: mobile + password.
-- OTP endpoints remain available for future SMS integration.
-- Registration OTP requirement controlled by `AUTH_REQUIRE_OTP_FOR_REGISTRATION`.
+## Auth & Access
+- Factory endpoints all require JWT.
+- Member/company/factory resources are owner-scoped.
 
-## Authorization & Isolation
-- `/api/member-profile/me` and `/api/company-profile/me` require JWT.
-- Access is restricted to current user ownership (`userId`).
-- No public endpoints expose other members' profile/company data.
+## Factory Anti-IDOR Rules
+- Every factory query filters by `ownerUserId = currentUserId`.
+- `GET /api/factories/:id`, `PUT /api/factories/:id`, `DELETE /api/factories/:id` return safe not-found when ownership does not match.
+- No public factory listing across users.
 
-## Validation
-- Server-side Zod validation for auth/member/company inputs.
+## Data Isolation
+- No competitor factory data is exposed.
+- Backend never relies on frontend-only filtering.
 
-## Runtime Safety
-- Startup logs explicitly show DB init errors and next-step commands.
-- Health endpoint can still be checked even if DB init fails.
-- This does not reduce authorization checks; DB-backed APIs will still fail safely if DB is unavailable.
+## Validation & Auditing
+- Factory input validation is server-side via Zod.
+- Audit logs for `FACTORY_CREATED`, `FACTORY_UPDATED`, `FACTORY_DELETED` include `factoryId` and `companyProfileId`.
 
 ## Secrets
-- `.env.example` only contains non-secret placeholders.
-- Never commit real `.env` values.
+- `.env` is not committed.
+- `.env.example` only includes local-safe placeholders.

@@ -45,3 +45,29 @@ export const companyProfileSchema = z.object({
   logoUrl: z.string().trim().url('آدرس لوگو معتبر نیست.').max(500).optional().or(z.literal('').transform(() => undefined)),
   description: optionalTrimmed,
 });
+
+
+const optionalPositive = z.coerce.number().positive().optional();
+const optionalNonNegativeInt = z.coerce.number().int().min(0).optional();
+
+export const factorySchema = z.object({
+  name: z.string().trim().min(2).max(160),
+  province: z.string().trim().min(2).max(80),
+  city: z.string().trim().min(2).max(80),
+  address: z.string().trim().min(5).max(500),
+  landAreaSqm: optionalPositive,
+  landOwnershipType: z.enum(['OWNED', 'RENTED', 'PARTNERSHIP', 'OTHER']),
+  monthlyRentAmount: optionalPositive,
+  batchingPlantCount: optionalNonNegativeInt,
+  batchingPlantType: z.enum(['WET', 'DRY', 'HYBRID']).optional(),
+  batchingPlantBrand: z.string().trim().max(120).optional().or(z.literal('').transform(() => undefined)),
+  dailyProductionCapacityM3: optionalPositive,
+  cementSiloCount: optionalNonNegativeInt,
+  cementSiloCapacityTons: optionalPositive,
+  hasWaterWell: z.boolean().default(false),
+  hasLaboratory: z.boolean().default(false),
+  hasWeighbridge: z.boolean().default(false),
+  cementPurchaseSource: z.enum(['COMMODITY_EXCHANGE', 'FREE_MARKET', 'MIXED']).default('MIXED'),
+  operationalStatus: z.enum(['ACTIVE', 'SEMI_ACTIVE', 'INACTIVE']).default('ACTIVE'),
+  notes: z.string().trim().max(1000).optional().or(z.literal('').transform(() => undefined)),
+});

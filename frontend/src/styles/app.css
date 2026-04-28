@@ -210,3 +210,13 @@ button {
   padding: 0.45rem 0.6rem;
   color: #334155;
 }
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-row input {
+  width: auto;
+}
