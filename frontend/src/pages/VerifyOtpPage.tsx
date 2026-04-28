@@ -25,14 +25,15 @@ function VerifyOtpPage() {
   }
 
   return (
-    <section className="card">
+    <section className="card auth-card">
       <h2>تأیید شماره موبایل</h2>
+      <p>کد ارسال‌شده را وارد کنید تا ثبت‌نام تکمیل شود.</p>
       <form onSubmit={handleSubmit}>
         <label htmlFor="mobile">شماره موبایل</label>
         <input id="mobile" value={mobileNumber} onChange={(event) => setMobileNumber(event.target.value)} required />
         <label htmlFor="code">کد تأیید</label>
         <input id="code" value={code} onChange={(event) => setCode(event.target.value)} required />
-        <button type="submit">تأیید</button>
+        <button type="submit">تأیید کد</button>
       </form>
       {error && <p className="error">{error}</p>}
     </section>

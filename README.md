@@ -63,3 +63,21 @@ npm run dev
 
 ## Out of Scope in this Phase
 Company profile, factories, machinery, materials, mix design, costing, pricing proposals, and admin reporting are intentionally not implemented yet.
+
+
+## Frontend Preview Mode (بدون Backend)
+برای مشاهده UI حرفه‌ای پرتال بدون نیاز به PostgreSQL/Prisma/Backend:
+
+### Windows CMD
+```cmd
+cd /d C:\Users\bavaf\concrete-association-portal\frontend
+copy /Y .env.example .env
+npm install
+npm run dev
+```
+
+Preview URL:
+- `http://localhost:5173`
+
+برای جزئیات بیشتر فایل زیر را ببینید:
+- `docs/LOCAL_PREVIEW.md`

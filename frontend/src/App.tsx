@@ -7,18 +7,23 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './auth/AuthContext';
+import { PREVIEW_MODE } from './config';
 
 function App() {
   const { token, logout } = useAuth();
 
   return (
     <div className="app-shell">
-      <header>
-        <h1>پرتال انجمن بتن</h1>
+      <header className="topbar">
+        <div>
+          <h1>پرتال انجمن بتن</h1>
+          <p className="subtitle">سامانه دیجیتال مدیریت اعضا، کارخانه‌ها و پیشنهادهای قیمت</p>
+        </div>
         <nav>
           <Link to="/">خانه</Link>
           {!token && <Link to="/login">ورود</Link>}
-          {!token && <Link to="/request-otp">ثبت‌نام</Link>}
+          {!token && <Link to="/register">ثبت‌نام</Link>}
+          {!token && <Link to="/request-otp">دریافت کد تأیید</Link>}
           {token && <Link to="/dashboard">داشبورد</Link>}
           {token && (
             <button type="button" onClick={logout} className="btn-link">
@@ -27,6 +32,8 @@ function App() {
           )}
         </nav>
       </header>
+
+      {PREVIEW_MODE && <p className="preview-badge">حالت پیش‌نمایش فاز ۱ فعال است (بدون اتصال به backend)</p>}
 
       <main>
         <Routes>

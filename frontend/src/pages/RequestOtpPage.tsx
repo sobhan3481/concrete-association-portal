@@ -26,8 +26,9 @@ function RequestOtpPage() {
   }
 
   return (
-    <section className="card">
-      <h2>درخواست کد تأیید</h2>
+    <section className="card auth-card">
+      <h2>دریافت کد تأیید</h2>
+      <p>برای شروع ثبت‌نام، شماره موبایل خود را وارد کنید.</p>
       <form onSubmit={handleSubmit}>
         <label htmlFor="mobile">شماره موبایل</label>
         <input id="mobile" value={mobileNumber} onChange={(event) => setMobileNumber(event.target.value)} required />

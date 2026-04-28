@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { apiRequest } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { PREVIEW_MODE } from '../config';
 
 type Profile = {
   fullName: string;
@@ -8,6 +9,8 @@ type Profile = {
   mobileNumber: string;
   roles: string[];
 };
+
+const statusCards = ['وضعیت عضویت', 'تکمیل پروفایل', 'کارخانه‌های ثبت‌شده', 'پیشنهاد قیمت'];
 
 function DashboardPage() {
   const { token } = useAuth();
@@ -28,16 +31,26 @@ function DashboardPage() {
   }, [token]);
 
   return (
-    <section className="card">
+    <section className="card dashboard">
       <h2>داشبورد</h2>
+      {PREVIEW_MODE && <p className="hint">این داشبورد در حالت پیش‌نمایش اجرا شده و به backend متصل نیست.</p>}
       {error && <p className="error">{error}</p>}
       {profile && (
-        <ul>
-          <li>نام: {profile.fullName}</li>
-          <li>نام کاربری: {profile.username}</li>
-          <li>شماره موبایل: {profile.mobileNumber}</li>
-          <li>نقش‌ها: {profile.roles.join('، ')}</li>
-        </ul>
+        <>
+          <ul className="profile-list">
+            <li>نام کاربر: {profile.fullName}</li>
+            <li>نقش: {profile.roles.join('، ')}</li>
+            <li>موبایل: {profile.mobileNumber}</li>
+          </ul>
+          <div className="status-grid">
+            {statusCards.map((card) => (
+              <article className="status-card" key={card}>
+                <h3>{card}</h3>
+                <p>آماده برای تکمیل در فاز بعدی</p>
+              </article>
+            ))}
+          </div>
+        </>
       )}
     </section>
   );

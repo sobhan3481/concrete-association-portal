@@ -2,12 +2,6 @@ import { FormEvent, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiRequest } from '../api/client';
 
-type RegisterResponse = {
-  accessToken: string;
-  refreshToken: string;
-  user: { fullName: string };
-};
-
 function RegisterPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -21,7 +15,7 @@ function RegisterPage() {
     setError('');
 
     try {
-      await apiRequest<RegisterResponse>('/api/auth/register', {
+      await apiRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ mobileNumber, fullName, password }),
       });
@@ -32,8 +26,9 @@ function RegisterPage() {
   }
 
   return (
-    <section className="card">
-      <h2>ثبت‌نام</h2>
+    <section className="card auth-card">
+      <h2>ثبت‌نام عضو جدید</h2>
+      <p>اطلاعات اولیه را وارد کنید تا حساب کاربری شما ایجاد شود.</p>
       <form onSubmit={handleSubmit}>
         <label htmlFor="fullName">نام و نام خانوادگی</label>
         <input id="fullName" value={fullName} onChange={(event) => setFullName(event.target.value)} required />
@@ -48,7 +43,7 @@ function RegisterPage() {
           minLength={8}
           required
         />
-        <button type="submit">ثبت‌نام</button>
+        <button type="submit">تکمیل ثبت‌نام</button>
       </form>
       {error && <p className="error">{error}</p>}
     </section>
