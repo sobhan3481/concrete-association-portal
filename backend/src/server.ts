@@ -4,6 +4,8 @@ import cors from 'cors';
 import { env } from './config/env.js';
 import { authRouter } from './routes/auth.route.js';
 import { healthRouter } from './routes/health.route.js';
+import { memberProfileRouter } from './routes/member-profile.route.js';
+import { companyProfileRouter } from './routes/company-profile.route.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { ensureRolesSeeded } from './services/role.service.js';
 import { prisma } from './config/prisma.js';
@@ -16,17 +18,32 @@ app.use(express.json());
 
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/member-profile', memberProfileRouter);
+app.use('/api/company-profile', companyProfileRouter);
 app.use(errorHandler);
 
+async function initializeDatabase() {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    await ensureRolesSeeded();
+    console.log('Database connection and role seeding completed.');
+  } catch (error) {
+    console.error('Database initialization failed. Backend is running but DB-dependent APIs may fail.');
+    console.error('Run: npm run prisma:generate (or prisma:generate:checksum-bypass), then check DATABASE_URL and PostgreSQL.');
+    console.error(error);
+  }
+}
+
 async function bootstrap() {
-  await ensureRolesSeeded();
   app.listen(env.port, () => {
     console.log(`Backend running on http://localhost:${env.port}`);
   });
+
+  await initializeDatabase();
 }
 
 bootstrap().catch(async (error) => {
-  console.error(error);
+  console.error('Fatal startup error:', error);
   await prisma.$disconnect();
   process.exit(1);
 });
