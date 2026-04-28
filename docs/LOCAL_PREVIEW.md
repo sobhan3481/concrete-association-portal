@@ -1,4 +1,4 @@
-# Local Run Modes (Phase 4)
+# Local Run Modes (Phase 5)
 
 ## A) Frontend-only Preview (Windows CMD)
 ```cmd
@@ -11,9 +11,8 @@ npm install
 npm run dev
 ```
 Open:
-- http://localhost:5173
-- http://localhost:5173/factories
-- http://localhost:5173/factories/mock-factory-1/machinery
+- http://localhost:5173/factories/mock-factory-1/materials
+- http://localhost:5173/factories/mock-factory-1/mix-designs
 
 ## B) Full backend + DB mode (Windows CMD)
 ```cmd
@@ -32,9 +31,3 @@ npm run dev
 ```
 Open:
 - http://localhost:4000/api/health
-
-If checksum issue appears:
-```cmd
-npm run prisma:generate:checksum-bypass
-npm run prisma:migrate:checksum-bypass
-```

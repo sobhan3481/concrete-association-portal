@@ -76,6 +76,34 @@ enum MachineryOwnershipType {
   OTHER
 }
 
+enum MaterialType {
+  CEMENT
+  COARSE_AGGREGATE
+  FINE_AGGREGATE
+  WATER
+  ADMIXTURE
+  GEL
+  POZZOLAN
+  SLAG
+  OTHER
+}
+
+enum MaterialUnit {
+  KG
+  TON
+  LITER
+  CUBIC_METER
+  UNIT
+}
+
+enum MaterialPurchaseSource {
+  COMMODITY_EXCHANGE
+  FREE_MARKET
+  DIRECT_SUPPLIER
+  INTERNAL
+  OTHER
+}
+
 model User {
   id               String          @id @default(cuid())
   username         String          @unique
@@ -91,6 +119,8 @@ model User {
   companyProfile   CompanyProfile?
   ownedFactories   Factory[]
   ownedMachinery   Machinery[]
+  ownedMaterials   Material[]
+  ownedMixDesigns  MixDesign[]
 }
 
 model Role {
@@ -228,6 +258,8 @@ model Factory {
   companyProfile            CompanyProfile       @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
   ownerUser                 User                 @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   machinery                 Machinery[]
+  materials                 Material[]
+  mixDesigns                MixDesign[]
 
   @@index([companyProfileId])
   @@index([ownerUserId])
@@ -262,4 +294,71 @@ model Machinery {
   @@index([factoryId])
   @@index([ownerUserId])
   @@index([machineryType])
+}
+
+
+model Material {
+  id             String                 @id @default(cuid())
+  factoryId      String
+  ownerUserId    String
+  materialType   MaterialType
+  name           String
+  unit           MaterialUnit
+  unitPrice      Decimal                @db.Decimal(12, 2)
+  supplierName   String?
+  purchaseSource MaterialPurchaseSource?
+  isActive       Boolean                @default(true)
+  notes          String?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  factory        Factory                @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  ownerUser      User                   @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  mixDesignItems MixDesignItem[]
+
+  @@index([factoryId])
+  @@index([ownerUserId])
+  @@index([materialType])
+}
+
+model MixDesign {
+  id                      String          @id @default(cuid())
+  factoryId               String
+  ownerUserId             String
+  title                   String
+  concreteGrade           Int
+  resistanceClass         String?
+  slumpMm                 Int?
+  targetStrengthMpa       Decimal?        @db.Decimal(12, 2)
+  wasteFactorPercent      Decimal         @default(0) @db.Decimal(8, 2)
+  labCostPerM3            Decimal         @default(0) @db.Decimal(12, 2)
+  directMaterialCostPerM3 Decimal         @default(0) @db.Decimal(12, 2)
+  calculatedCostPerM3     Decimal         @default(0) @db.Decimal(12, 2)
+  isActive                Boolean         @default(true)
+  notes                   String?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  factory                 Factory         @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  ownerUser               User            @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  items                   MixDesignItem[]
+
+  @@index([factoryId])
+  @@index([ownerUserId])
+  @@index([concreteGrade])
+}
+
+model MixDesignItem {
+  id                String       @id @default(cuid())
+  mixDesignId       String
+  materialId        String
+  quantity          Decimal      @db.Decimal(12, 3)
+  unit              MaterialUnit
+  unitPriceSnapshot Decimal      @db.Decimal(12, 2)
+  totalCost         Decimal      @db.Decimal(12, 2)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  mixDesign         MixDesign    @relation(fields: [mixDesignId], references: [id], onDelete: Cascade)
+  material          Material     @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@index([mixDesignId])
+  @@index([materialId])
 }

@@ -8,6 +8,8 @@ import { memberProfileRouter } from './routes/member-profile.route.js';
 import { companyProfileRouter } from './routes/company-profile.route.js';
 import { factoryRouter } from './routes/factory.route.js';
 import { factoryMachineryRouter, machineryRouter } from './routes/machinery.route.js';
+import { factoryMaterialRouter, materialRouter } from './routes/material.route.js';
+import { factoryMixDesignRouter, mixDesignRouter } from './routes/mix-design.route.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { ensureRolesSeeded } from './services/role.service.js';
 import { prisma } from './config/prisma.js';
@@ -25,6 +27,10 @@ app.use('/api/company-profile', companyProfileRouter);
 app.use('/api/factories', factoryRouter);
 app.use('/api/factories/:factoryId/machinery', factoryMachineryRouter);
 app.use('/api/machinery', machineryRouter);
+app.use('/api/factories/:factoryId/materials', factoryMaterialRouter);
+app.use('/api/materials', materialRouter);
+app.use('/api/factories/:factoryId/mix-designs', factoryMixDesignRouter);
+app.use('/api/mix-designs', mixDesignRouter);
 app.use(errorHandler);
 
 async function initializeDatabase() {

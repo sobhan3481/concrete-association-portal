@@ -1,29 +1,25 @@
-# Architecture (Phase 4)
+# Architecture (Phase 5)
 
-## Backend Modules
-- Auth module (OTP + mobile/password login).
-- Member Profile module (owner-only).
-- Company Profile module (owner-only).
-- Factory module (owner-only CRUD).
-- Machinery module (owner-only CRUD, factory-scoped list/create).
+## Modules
+- Auth
+- Member Profile
+- Company Profile
+- Factory
+- Machinery
+- Materials
+- MixDesign
 
-## Data Model Evolution
-- `User` -> one `CompanyProfile`
-- `CompanyProfile` -> many `Factory`
-- `Factory` -> many `Machinery`
-- `Factory` and `Machinery` both store `ownerUserId` for strict anti-IDOR filtering.
+## Data Relations
+- Factory -> many Material
+- Factory -> many MixDesign
+- MixDesign -> many MixDesignItem
+- Material -> many MixDesignItem
+- Material/MixDesign store ownerUserId for anti-IDOR
 
-## API Shape
-- Factory-scoped machinery:
-  - `GET/POST /api/factories/:factoryId/machinery`
-- Machinery item endpoints:
-  - `GET/PUT/DELETE /api/machinery/:id`
-
-## Frontend
-- Added routes:
-  - `/factories/:factoryId/machinery`
-  - `/factories/:factoryId/machinery/new`
-  - `/machinery/:id/edit`
+## Cost Baseline
+- `directMaterialCostPerM3`: sum of MixDesignItem costs
+- `calculatedCostPerM3`: direct + lab + waste
+- Final selling price is out of scope
 
 ## Future Path
-- Phase 5: Materials & Mix Design Foundation, then cost/pricing layers.
+- Phase 6: Production Costs & Overhead Foundation

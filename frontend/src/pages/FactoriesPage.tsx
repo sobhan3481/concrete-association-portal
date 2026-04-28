@@ -51,6 +51,8 @@ function FactoriesPage() {
               <p>وضعیت فعالیت: {item.operationalStatus}</p>
               <div className="cta-row">
                 <Link className="cta-secondary" to={`/factories/${item.id}/machinery`}>ماشین‌آلات</Link>
+                <Link className="cta-secondary" to={`/factories/${item.id}/materials`}>مواد اولیه</Link>
+                <Link className="cta-secondary" to={`/factories/${item.id}/mix-designs`}>طرح اختلاط</Link>
                 <Link className="cta-secondary" to={`/factories/${item.id}/edit`}>ویرایش</Link>
                 <button type="button" onClick={() => onDelete(item.id)}>حذف</button>
               </div>

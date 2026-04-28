@@ -1,24 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { apiRequest, listFactories, listMachinery } from '../api/client';
+import { apiRequest, listFactories, listMachinery, listMaterials, listMixDesigns } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { PREVIEW_MODE } from '../config';
 
-type Profile = {
-  fullName: string;
-  mobileNumber: string;
-};
-
-type MemberProfile = {
-  profileStatus: 'INCOMPLETE' | 'COMPLETE';
-  approvalStatus: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
-};
-
-type CompanyProfile = {
-  companyName: string;
-  companyStatus: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
-};
-
+type Profile = { fullName: string; mobileNumber: string };
+type MemberProfile = { profileStatus: 'INCOMPLETE' | 'COMPLETE'; approvalStatus: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' };
+type CompanyProfile = { companyName: string; companyStatus: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' };
 type Factory = { id: string };
 
 function DashboardPage() {
@@ -28,6 +16,8 @@ function DashboardPage() {
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
   const [factoryCount, setFactoryCount] = useState(0);
   const [machineryCount, setMachineryCount] = useState(0);
+  const [materialCount, setMaterialCount] = useState(0);
+  const [mixCount, setMixCount] = useState(0);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -39,15 +29,20 @@ function DashboardPage() {
           apiRequest<CompanyProfile>('/api/company-profile/me', {}, token ?? undefined),
           listFactories(token ?? undefined),
         ]);
-
-        const machineryLists = await Promise.all((factories as Factory[]).map((x) => listMachinery(x.id, token ?? undefined)));
-        const machineryTotal = machineryLists.reduce((sum: number, items: { length: number }) => sum + items.length, 0);
+        const f = factories as Factory[];
+        const [machineryLists, materialLists, mixLists] = await Promise.all([
+          Promise.all(f.map((x) => listMachinery(x.id, token ?? undefined))),
+          Promise.all(f.map((x) => listMaterials(x.id, token ?? undefined))),
+          Promise.all(f.map((x) => listMixDesigns(x.id, token ?? undefined))),
+        ]);
 
         setProfile(me);
         setMemberProfile(member);
         setCompanyProfile(company);
         setFactoryCount(factories.length);
-        setMachineryCount(machineryTotal);
+        setMachineryCount(machineryLists.reduce((a, b) => a + b.length, 0));
+        setMaterialCount(materialLists.reduce((a, b) => a + b.length, 0));
+        setMixCount(mixLists.reduce((a, b) => a + b.length, 0));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'امکان دریافت اطلاعات کاربر وجود ندارد.');
       }
@@ -71,6 +66,8 @@ function DashboardPage() {
             <li>اطلاعات شرکت: {companyProfile?.companyName ? `${companyProfile.companyName} (${companyProfile.companyStatus})` : 'ثبت نشده'}</li>
             <li>تعداد کارخانه‌ها: {factoryCount}</li>
             <li>تعداد ماشین‌آلات: {machineryCount}</li>
+            <li>تعداد مواد اولیه: {materialCount}</li>
+            <li>تعداد طرح اختلاط: {mixCount}</li>
           </ul>
 
           <div className="cta-row">
@@ -78,13 +75,17 @@ function DashboardPage() {
             <Link className="cta-secondary" to="/company">ثبت/ویرایش شرکت</Link>
             <Link className="cta-secondary" to="/factories">مدیریت کارخانه‌ها</Link>
             <Link className="cta-secondary" to="/factories">مدیریت ماشین‌آلات</Link>
+            <Link className="cta-secondary" to="/factories">مدیریت مواد اولیه</Link>
+            <Link className="cta-secondary" to="/factories">مدیریت طرح اختلاط</Link>
           </div>
 
-          {factoryCount === 0 && <p className="hint">برای مدیریت ماشین‌آلات ابتدا کارخانه خود را ثبت کنید.</p>}
+          {factoryCount === 0 && <p className="hint">برای مدیریت مواد اولیه و طرح اختلاط ابتدا کارخانه خود را ثبت کنید.</p>}
 
           <div className="status-grid">
             <article className="status-card"><h3>کارخانه‌ها</h3><p>{factoryCount} واحد ثبت شده</p></article>
             <article className="status-card"><h3>ماشین‌آلات</h3><p>{machineryCount} مورد ثبت شده</p></article>
+            <article className="status-card"><h3>مواد اولیه</h3><p>{materialCount} مورد ثبت شده</p></article>
+            <article className="status-card"><h3>طرح اختلاط</h3><p>{mixCount} مورد ثبت شده</p></article>
             <article className="status-card disabled"><h3>پیشنهاد قیمت</h3><p>به‌زودی</p></article>
           </div>
         </>

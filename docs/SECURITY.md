@@ -1,23 +1,16 @@
-# Security Baseline (Phase 4)
+# Security Baseline (Phase 5)
 
-## Auth & Ownership
-- All machinery endpoints require JWT.
-- Machinery is owner-scoped by `ownerUserId`.
-- Factory ownership is verified before machinery list/create operations.
-
-## Machinery Anti-IDOR Rules
-- `GET /api/factories/:factoryId/machinery` and `POST /api/factories/:factoryId/machinery` first verify owned factory.
-- `GET/PUT/DELETE /api/machinery/:id` filter by `ownerUserId` and return safe not-found when not owned.
-- No public machinery listing across users.
+## Ownership & Anti-IDOR
+- All material/mix-design endpoints require JWT.
+- Factory ownership checked before list/create operations.
+- Material ownership checked before get/update/delete.
+- Mix design ownership checked before get/update/delete/items update.
+- Mix design items must reference materials from same owner and same factory.
 
 ## Data Isolation
-- No competitor factory or machinery data leakage.
-- Backend enforces ownership checks; frontend filtering is not trusted.
+- No public listing for competitor data.
+- Backend enforces ownerUserId filtering and safe not-found behavior.
 
 ## Validation & Auditing
-- Server-side Zod validation for machinery payload.
-- Audit logs for `MACHINERY_CREATED`, `MACHINERY_UPDATED`, `MACHINERY_DELETED` include `machineryId`, `factoryId`, and `machineryType`.
-
-## Secrets
-- `.env` is not committed.
-- `.env.example` contains only local-safe placeholders.
+- Zod validation for material/mix-design/items payloads.
+- Audit logs for material and mix design mutations, including items update costs.

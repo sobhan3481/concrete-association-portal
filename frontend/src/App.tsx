@@ -14,6 +14,11 @@ import FactoriesPage from './pages/FactoriesPage';
 import FactoryFormPage from './pages/FactoryFormPage';
 import MachineryPage from './pages/MachineryPage';
 import MachineryFormPage from './pages/MachineryFormPage';
+import MixDesignItemsPage from './pages/MixDesignItemsPage';
+import MixDesignFormPage from './pages/MixDesignFormPage';
+import MixDesignsPage from './pages/MixDesignsPage';
+import MaterialFormPage from './pages/MaterialFormPage';
+import MaterialsPage from './pages/MaterialsPage';
 
 function App() {
   const { token, logout } = useAuth();
@@ -32,6 +37,8 @@ function App() {
           {token && <Link to="/company">شرکت</Link>}
           {token && <Link to="/factories">کارخانه‌ها</Link>}
           {token && <Link to="/factories">ماشین‌آلات</Link>}
+          {token && <Link to="/factories">مواد اولیه</Link>}
+          {token && <Link to="/factories">طرح اختلاط</Link>}
           {!token && <Link to="/login">ورود</Link>}
           {!token && <Link to="/register">ثبت‌نام</Link>}
           {!token && <Link to="/request-otp">دریافت کد تأیید</Link>}
@@ -121,6 +128,62 @@ function App() {
             element={
               <ProtectedRoute>
                 <MachineryFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/:factoryId/materials"
+            element={
+              <ProtectedRoute>
+                <MaterialsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/:factoryId/materials/new"
+            element={
+              <ProtectedRoute>
+                <MaterialFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/materials/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MaterialFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/:factoryId/mix-designs"
+            element={
+              <ProtectedRoute>
+                <MixDesignsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/factories/:factoryId/mix-designs/new"
+            element={
+              <ProtectedRoute>
+                <MixDesignFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mix-designs/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MixDesignFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mix-designs/:id/items"
+            element={
+              <ProtectedRoute>
+                <MixDesignItemsPage />
               </ProtectedRoute>
             }
           />

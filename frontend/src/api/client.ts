@@ -4,6 +4,31 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000
 
 export type ApiError = { message: string };
 
+export type MaterialPayload = {
+  materialType: 'CEMENT' | 'COARSE_AGGREGATE' | 'FINE_AGGREGATE' | 'WATER' | 'ADMIXTURE' | 'GEL' | 'POZZOLAN' | 'SLAG' | 'OTHER';
+  name: string;
+  unit: 'KG' | 'TON' | 'LITER' | 'CUBIC_METER' | 'UNIT';
+  unitPrice: number;
+  supplierName?: string;
+  purchaseSource?: 'COMMODITY_EXCHANGE' | 'FREE_MARKET' | 'DIRECT_SUPPLIER' | 'INTERNAL' | 'OTHER';
+  isActive: boolean;
+  notes?: string;
+};
+
+export type MixDesignPayload = {
+  title: string;
+  concreteGrade: number;
+  resistanceClass?: string;
+  slumpMm?: number;
+  targetStrengthMpa?: number;
+  wasteFactorPercent?: number;
+  labCostPerM3?: number;
+  isActive: boolean;
+  notes?: string;
+};
+
+export type MixDesignItemPayload = { materialId: string; quantity: number; unit: 'KG' | 'TON' | 'LITER' | 'CUBIC_METER' | 'UNIT' };
+
 export type MachineryPayload = {
   machineryType: 'LOADER' | 'MIXER' | 'DUMP_TRUCK' | 'STATIONARY_PUMP' | 'BOOM_PUMP';
   ownershipType: 'OWNED' | 'RENTED' | 'LEASED' | 'OTHER';
@@ -56,6 +81,9 @@ type AuthUser = {
 
 export type FactoryItem = FactoryPayload & { id: string; createdAt?: string };
 export type MachineryItem = MachineryPayload & { id: string; factoryId: string; createdAt?: string };
+export type MaterialItem = MaterialPayload & { id: string; factoryId: string };
+export type MixDesignItem = MixDesignItemPayload & { id: string; unitPriceSnapshot?: number; totalCost?: number };
+export type MixDesignItemModel = MixDesignPayload & { id: string; factoryId: string; directMaterialCostPerM3: number; calculatedCostPerM3: number; items?: MixDesignItem[] };
 
 let previewFactories: FactoryItem[] = [
   {
@@ -102,6 +130,10 @@ let previewMachinery: MachineryItem[] = [
     notes: 'ماشین‌آلات نمایشی',
   },
 ];
+
+let previewMaterials: MaterialItem[] = [{ id: 'mat-1', factoryId: 'mock-factory-1', materialType: 'CEMENT', name: 'سیمان تیپ ۲', unit: 'TON', unitPrice: 2800000, purchaseSource: 'COMMODITY_EXCHANGE', isActive: true }];
+
+let previewMixDesigns: MixDesignItemModel[] = [{ id: 'mix-1', factoryId: 'mock-factory-1', title: 'طرح پایه ۳۵۰', concreteGrade: 350, resistanceClass: 'C30', slumpMm: 80, wasteFactorPercent: 2, labCostPerM3: 120000, directMaterialCostPerM3: 0, calculatedCostPerM3: 0, isActive: true, items: [] }];
 
 let previewMemberProfile = {
   memberType: 'INDIVIDUAL',
@@ -226,6 +258,97 @@ function mockApi<T>(path: string, options: RequestInit): T {
     return { message: 'ماشین‌آلات حذف شد.' } as T;
   }
 
+
+  const materialsMatch = path.match(/^\/api\/factories\/([^/]+)\/materials$/);
+  if (materialsMatch && (!options.method || options.method === 'GET')) {
+    const factoryId = materialsMatch[1];
+    return previewMaterials.filter((x) => x.factoryId === factoryId) as T;
+  }
+  if (materialsMatch && options.method === 'POST') {
+    const factoryId = materialsMatch[1];
+    const body = JSON.parse(String(options.body ?? '{}')) as MaterialPayload;
+    const created: MaterialItem = { ...body, id: `mat-${Date.now()}`, factoryId };
+    previewMaterials = [created, ...previewMaterials];
+    return created as T;
+  }
+  if (path.startsWith('/api/materials/') && (!options.method || options.method === 'GET')) {
+    const id = path.split('/').pop()!;
+    const item = previewMaterials.find((x) => x.id === id);
+    if (!item) throw new Error('ماده اولیه یافت نشد.');
+    return item as T;
+  }
+  if (path.startsWith('/api/materials/') && options.method === 'PUT') {
+    const id = path.split('/').pop()!;
+    const body = JSON.parse(String(options.body ?? '{}')) as MaterialPayload;
+    previewMaterials = previewMaterials.map((x) => x.id === id ? { ...x, ...body } : x);
+    const item = previewMaterials.find((x) => x.id === id);
+    if (!item) throw new Error('ماده اولیه یافت نشد.');
+    return item as T;
+  }
+  if (path.startsWith('/api/materials/') && options.method === 'DELETE') {
+    const id = path.split('/').pop()!;
+    previewMaterials = previewMaterials.filter((x) => x.id !== id);
+    return { message: 'ماده اولیه حذف شد.' } as T;
+  }
+
+  const mixesMatch = path.match(/^\/api\/factories\/([^/]+)\/mix-designs$/);
+  if (mixesMatch && (!options.method || options.method === 'GET')) {
+    const factoryId = mixesMatch[1];
+    return previewMixDesigns.filter((x) => x.factoryId === factoryId) as T;
+  }
+  if (mixesMatch && options.method === 'POST') {
+    const factoryId = mixesMatch[1];
+    const body = JSON.parse(String(options.body ?? '{}')) as MixDesignPayload;
+    const created: MixDesignItemModel = { ...body, id: `mix-${Date.now()}`, factoryId, directMaterialCostPerM3: 0, calculatedCostPerM3: 0, items: [] };
+    previewMixDesigns = [created, ...previewMixDesigns];
+    return created as T;
+  }
+  if (path.startsWith('/api/mix-designs/') && (!options.method || options.method === 'GET')) {
+    const id = path.split('/')[3];
+    const item = previewMixDesigns.find((x) => x.id === id);
+    if (!item) throw new Error('طرح اختلاط یافت نشد.');
+    return item as T;
+  }
+  if (path.startsWith('/api/mix-designs/') && options.method === 'PUT' && !path.endsWith('/items')) {
+    const id = path.split('/')[3];
+    const body = JSON.parse(String(options.body ?? '{}')) as MixDesignPayload;
+    previewMixDesigns = previewMixDesigns.map((x) => x.id === id ? { ...x, ...body } : x);
+    const item = previewMixDesigns.find((x) => x.id === id);
+    if (!item) throw new Error('طرح اختلاط یافت نشد.');
+    return item as T;
+  }
+  if (path.startsWith('/api/mix-designs/') && options.method === 'DELETE') {
+    const id = path.split('/')[3];
+    previewMixDesigns = previewMixDesigns.filter((x) => x.id !== id);
+    return { message: 'طرح اختلاط حذف شد.' } as T;
+  }
+  if (path.startsWith('/api/mix-designs/') && options.method === 'PUT' && path.endsWith('/items')) {
+    const id = path.split('/')[3];
+    const body = JSON.parse(String(options.body ?? '{}')) as { items: MixDesignItemPayload[] };
+    const design = previewMixDesigns.find((x) => x.id === id);
+    if (!design) throw new Error('طرح اختلاط یافت نشد.');
+
+    let direct = 0;
+    const newItems = body.items.map((it, idx) => {
+      const mat = previewMaterials.find((m) => m.id === it.materialId);
+      if (!mat) throw new Error('برخی مواد اولیه معتبر نیستند.');
+      let total = 0;
+      if (mat.unit === it.unit) total = it.quantity * mat.unitPrice;
+      else if (mat.unit === 'TON' && it.unit === 'KG') total = (it.quantity / 1000) * mat.unitPrice;
+      else if (mat.unit === 'KG' && it.unit === 'TON') total = (it.quantity * 1000) * mat.unitPrice;
+      else throw new Error('واحد ماده با واحد آیتم سازگار نیست.');
+      direct += total;
+      return { id: `mdi-${Date.now()}-${idx}`, ...it, unitPriceSnapshot: mat.unitPrice, totalCost: total };
+    });
+
+    const lab = Number(design.labCostPerM3 ?? 0);
+    const waste = Number(design.wasteFactorPercent ?? 0);
+    const calc = direct + lab + (direct * waste / 100);
+
+    previewMixDesigns = previewMixDesigns.map((x) => x.id === id ? { ...x, items: newItems, directMaterialCostPerM3: direct, calculatedCostPerM3: calc } : x);
+    return previewMixDesigns.find((x) => x.id === id) as T;
+  }
+
   if (path === '/api/health') return { status: 'ok', previewMode: true } as T;
 
   throw new Error('این عملیات در حالت پیش‌نمایش شبیه‌سازی نشده است.');
@@ -270,3 +393,15 @@ export const updateMachinery = (id: string, payload: MachineryPayload, token?: s
   apiRequest<MachineryItem>(`/api/machinery/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token);
 export const deleteMachinery = (id: string, token?: string) =>
   apiRequest<{ message: string }>(`/api/machinery/${id}`, { method: 'DELETE' }, token);
+
+export const listMaterials = (factoryId: string, token?: string) => apiRequest<MaterialItem[]>(`/api/factories/${factoryId}/materials`, {}, token);
+export const getMaterial = (id: string, token?: string) => apiRequest<MaterialItem>(`/api/materials/${id}`, {}, token);
+export const createMaterial = (factoryId: string, payload: MaterialPayload, token?: string) => apiRequest<MaterialItem>(`/api/factories/${factoryId}/materials`, { method: 'POST', body: JSON.stringify(payload) }, token);
+export const updateMaterial = (id: string, payload: MaterialPayload, token?: string) => apiRequest<MaterialItem>(`/api/materials/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token);
+export const deleteMaterial = (id: string, token?: string) => apiRequest<{ message: string }>(`/api/materials/${id}`, { method: 'DELETE' }, token);
+export const listMixDesigns = (factoryId: string, token?: string) => apiRequest<MixDesignItemModel[]>(`/api/factories/${factoryId}/mix-designs`, {}, token);
+export const getMixDesign = (id: string, token?: string) => apiRequest<MixDesignItemModel>(`/api/mix-designs/${id}`, {}, token);
+export const createMixDesign = (factoryId: string, payload: MixDesignPayload, token?: string) => apiRequest<MixDesignItemModel>(`/api/factories/${factoryId}/mix-designs`, { method: 'POST', body: JSON.stringify(payload) }, token);
+export const updateMixDesign = (id: string, payload: MixDesignPayload, token?: string) => apiRequest<MixDesignItemModel>(`/api/mix-designs/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token);
+export const deleteMixDesign = (id: string, token?: string) => apiRequest<{ message: string }>(`/api/mix-designs/${id}`, { method: 'DELETE' }, token);
+export const updateMixDesignItems = (id: string, items: MixDesignItemPayload[], token?: string) => apiRequest<MixDesignItemModel>(`/api/mix-designs/${id}/items`, { method: 'PUT', body: JSON.stringify({ items }) }, token);

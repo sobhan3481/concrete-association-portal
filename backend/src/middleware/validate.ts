@@ -95,3 +95,35 @@ export const machinerySchema = z.object({
   isActive: z.boolean().default(true),
   notes: z.string().trim().max(1000).optional().or(z.literal('').transform(() => undefined)),
 });
+
+
+export const materialSchema = z.object({
+  materialType: z.enum(['CEMENT', 'COARSE_AGGREGATE', 'FINE_AGGREGATE', 'WATER', 'ADMIXTURE', 'GEL', 'POZZOLAN', 'SLAG', 'OTHER']),
+  name: z.string().trim().min(2).max(160),
+  unit: z.enum(['KG', 'TON', 'LITER', 'CUBIC_METER', 'UNIT']),
+  unitPrice: z.coerce.number().positive(),
+  supplierName: z.string().trim().max(120).optional().or(z.literal('').transform(() => undefined)),
+  purchaseSource: z.enum(['COMMODITY_EXCHANGE', 'FREE_MARKET', 'DIRECT_SUPPLIER', 'INTERNAL', 'OTHER']).optional(),
+  isActive: z.boolean().default(true),
+  notes: z.string().trim().max(1000).optional().or(z.literal('').transform(() => undefined)),
+});
+
+export const mixDesignSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  concreteGrade: z.coerce.number().int().min(100).max(500),
+  resistanceClass: z.string().trim().max(20).optional().or(z.literal('').transform(() => undefined)),
+  slumpMm: z.coerce.number().int().min(0).optional(),
+  targetStrengthMpa: z.coerce.number().positive().optional(),
+  wasteFactorPercent: z.coerce.number().min(0).optional().default(0),
+  labCostPerM3: z.coerce.number().min(0).optional().default(0),
+  isActive: z.boolean().default(true),
+  notes: z.string().trim().max(1000).optional().or(z.literal('').transform(() => undefined)),
+});
+
+export const mixDesignItemsSchema = z.object({
+  items: z.array(z.object({
+    materialId: z.string().min(1),
+    quantity: z.coerce.number().positive(),
+    unit: z.enum(['KG', 'TON', 'LITER', 'CUBIC_METER', 'UNIT']),
+  })).min(1),
+});
