@@ -1,20 +1,22 @@
-# Security Baseline (Phase 1)
+# Security Baseline (Phase 3)
 
-- **Password Hashing**: `bcryptjs` with cost factor 12.
-- **JWT**: signed access token with configurable expiry.
-- **OTP Security**:
-  - OTP generated server-side.
-  - OTP stored as SHA-256 hash (not plaintext).
-  - Expiration, attempt cap, and resend cooldown enforced.
-- **Rate Limiting**:
-  - `/api/auth/request-otp`: 3 requests/min/IP
-  - `/api/auth/login`: 5 requests/min/IP
-- **Validation**: request body schema validation via `zod`.
-- **Audit Logging**: `OTP_REQUESTED`, `OTP_VERIFIED`, `USER_REGISTERED`, `LOGIN_SUCCESS`, `LOGIN_FAILURE`.
-- **CORS**: configurable allowed origin for localhost frontend.
-- **Role Seed**: `MEMBER`, `ASSOCIATION_ADMIN`, `SYSTEM_ADMIN` (idempotent upsert).
+## Auth & Access
+- Factory endpoints all require JWT.
+- Member/company/factory resources are owner-scoped.
 
-## Future Hardening
-- Per-tenant authorization policies to prevent cross-company access.
-- Anti-IDOR checks on all future member/company/factory resources.
-- Optional refresh-token rotation and revocation endpoints.
+## Factory Anti-IDOR Rules
+- Every factory query filters by `ownerUserId = currentUserId`.
+- `GET /api/factories/:id`, `PUT /api/factories/:id`, `DELETE /api/factories/:id` return safe not-found when ownership does not match.
+- No public factory listing across users.
+
+## Data Isolation
+- No competitor factory data is exposed.
+- Backend never relies on frontend-only filtering.
+
+## Validation & Auditing
+- Factory input validation is server-side via Zod.
+- Audit logs for `FACTORY_CREATED`, `FACTORY_UPDATED`, `FACTORY_DELETED` include `factoryId` and `companyProfileId`.
+
+## Secrets
+- `.env` is not committed.
+- `.env.example` only includes local-safe placeholders.
